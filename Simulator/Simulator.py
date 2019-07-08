@@ -4,12 +4,11 @@ from Equipment.Press import *
 from Equipment.TreatmentFurnace import *
 from Planner.HeuristicAllocator import *
 
-
 class Simulator:
     def __init__(self, product, job, ingot, heating_furnace_num, press_num, cutter_num, treatment_furnace_num):
         print('- create simulator -')
         self.env = simpy.Environment()
-        self.alloc = HeuristicAllocator(self.env)
+        self.alloc = HeuristicAllocator(self.env, heating_furnace_num)
 
         self.product = product
         self.job = job
