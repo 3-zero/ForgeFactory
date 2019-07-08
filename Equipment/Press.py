@@ -22,14 +22,17 @@ class Press:
                 continue
             print(self.env.now, self.name, ':: press start', self.current_job)
             press_time = self.calc_press_time()
+            #yield self.env.timeout(1)
             self.current_job['properties']['current_equip'] = self.name
             self.current_job['properties']['last_process'] = 'press'
             self.current_job['properties']['last_process_end_time'] = self.env.now + press_time
-            yield self.env.timeout(press_time)
             self.current_job['properties']['next_instruction'] += 1
             if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
                 self.current_job['properties']['state'] = 'done'
+            yield self.env.timeout(press_time)
             print(self.env.now, self.name, ':: press end', self.current_job)
+
+            #self.current_job['properties']['instruction_log'].append(self.name)
             self.alloc.end_job(self.current_job)
             #self.current_job = None
             #이거 해도 되나?? current job 저장된 본체가 사라지나..? 추후에 테스트 (굳이 안바꿔줘도 상관없긴 함)

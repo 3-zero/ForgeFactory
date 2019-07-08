@@ -35,4 +35,7 @@ class TreatmentFurnace:
                 j['properties']['next_instruction'] += 1
                 if len(j['properties']['instruction_list'][0]) == j['properties']['next_instruction']:
                     j['properties']['state'] = 'done'
+                    #j['properties']['instruction_log'].append(self.name)
             print(self.env.now, self.name, ':: treatment end', self.current_job_list)
+
+            self.current_job_list = []

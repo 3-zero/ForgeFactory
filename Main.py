@@ -33,6 +33,7 @@ def read_data(file):
             d['properties']['last_process'] = None
             d['properties']['last_process_end_time'] = None
             d['properties']['instruction_list'] = []
+            d['properties']['last_heating_furnace'] = None
             d['properties']['next_instruction'] = 0
             product_id_list = d['properties']['product_id_list']
             for product_id in product_id_list:
@@ -79,5 +80,5 @@ print(product_data), print(job_data), print(ingot_data)
 #print(dict_to_time(job_data[0]['properties']['deadline']))
 #print(job_data[0]['properties']['deadline'])
 
-simulator = Simulator(deepcopy(product_data), deepcopy(job_data), deepcopy(ingot_data), 1, 1, 1, 1)
+simulator = Simulator(deepcopy(product_data), deepcopy(job_data), deepcopy(ingot_data), 10, 10, 10, 10)
 simulator.run()
