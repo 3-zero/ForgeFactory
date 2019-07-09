@@ -1,5 +1,4 @@
 from Equipment.Cutter import *
-from Equipment.HeatingFurnace import *
 from Equipment.Press import *
 from Equipment.TreatmentFurnace import *
 from Planner.HeuristicAllocator import *
