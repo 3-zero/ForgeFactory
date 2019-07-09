@@ -54,10 +54,16 @@ def read_data(file):
                     elif inst[0] == 'heat':
                         instruction_list[i] = 'treating'
                         #instruction_list[i] = 'heating'
+
                 d['properties']['instruction_list'].append(instruction_list)
+            ingot_id = d['properties']['ingot_id_list'][0]
             if len(d['properties']['instruction_list']) == 0:
                 print('Error : instruction list is empty!')
                 exit(1)
+            for ingot in ingot_data:
+                if ingot['id'] == ingot_id:
+                    d['properties']['ingot'] = ingot['properties']
+                    break
     elif file == 'ingot':
         None
     return data
@@ -72,8 +78,8 @@ json 입력받을 때 time이 dictionary형식으로 저장되어있는데,
 -완-
 """
 product_data = read_data('product')
-job_data = read_data('job')
 ingot_data = read_data('ingot')
+job_data = read_data('job')
 
 print(product_data), print(job_data), print(ingot_data)
 
