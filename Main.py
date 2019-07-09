@@ -81,10 +81,10 @@ product_data = read_data('product')
 ingot_data = read_data('ingot')
 job_data = read_data('job')
 
-print(product_data), print(job_data), print(ingot_data)
+print(product_data), print(ingot_data), print(job_data)
 
 #print(dict_to_time(job_data[0]['properties']['deadline']))
 #print(job_data[0]['properties']['deadline'])
 
-simulator = Simulator(deepcopy(product_data), deepcopy(job_data), deepcopy(ingot_data), 10, 10, 10, 10)
+simulator = Simulator(deepcopy(product_data), deepcopy(ingot_data), deepcopy(job_data), 4, 2, 2, 2)
 simulator.run()
