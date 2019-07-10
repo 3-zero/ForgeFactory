@@ -1,8 +1,9 @@
 from Equipment.HeatingFurnace import *
 
 class HeuristicAllocator:
-    def __init__(self, env, heating_furnace_num):
+    def __init__(self, env, predictor, heating_furnace_num):
         self.env = env
+        self.predictor = predictor
         self.heating_furnace_num = heating_furnace_num
         self.insertion = self.env.event()
         self.request = self.env.event()

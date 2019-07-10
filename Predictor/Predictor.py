@@ -6,10 +6,12 @@ from Predictor.DnnRegression import *
 from Predictor.OneHotVectorCode import *
 
 import random
+import os
 
 class Predictor:
     def __init__(self):
-        self.model_path = '/Models/'
+        self.model_path = '/ForgeFactory/Predictor/Models/'
+        self.project_path = os.path.dirname(os.getcwd())
 
         self.first_heating_time_path = self.model_path + 'first_heating_time'
         self.first_heating_energy_path = self.model_path + 'first_heating_energy'
@@ -121,7 +123,7 @@ class Predictor:
 
         data = []
 
-        weight = weight
+        weight = weight #job의 weight
         if weight <= 15 or None:
             product_size = size[0]
         elif weight <= 25:
@@ -140,33 +142,16 @@ class Predictor:
 
         return float(forging_time)
 
-    def cutting_time_prediction(self, job, entity_mgr):
-        """
-        30분 N(0, 1)
-        weight, product_name, ingot_code, ingot_type, prod_count
-        :param equipment: cutting equipment entity
-        :param parameter:
-        :return: completion_time (seconds)
-        """
-        # cutting_time =1800
-        # cutting_time += random.gauss(0, 1)*60
+    def cutting_time_prediction(self, job):
+        weight = job['properties']['ingot']['current_weight']
+        tmp = cutter_ingot_type.TxtToCode(job['properties']['ingot']['type'])
+        prod_count = len(job['properties']['product_id_list'])
 
-        weight = job.get_weight(entity_mgr)
-        prod_count = len(job.product_id_list())
-        prod_id = job.product_id_list()[0]
-        prod = entity_mgr.get(prod_id)
-        ingot_type = prod.properties['ingot_type_list'][0]
-
-        tmp = cutter_ingot_type.TxtToCode(ingot_type)
         data = [weight]
         data.extend(tmp)
         data.append(prod_count)
-        # print(data)
-        # exit(0)
 
         cutting_time = self.cutting_time_model.predict(data)
-        # print(cutting_time)
-        # exit(0)
         return float(cutting_time)
 
     def treatment_time_prediction(self, entity_mgr, equipment, job_id_list):
@@ -440,8 +425,8 @@ class Predictor:
         return y
 
     def _init_first_heating_time(self):
-        project_path = self.project_path
-        model = self.reload_model(project_path + self.first_heating_time_path)
+        #project_path = self.project_path
+        model = self.reload_model(self.project_path + self.first_heating_time_path)
         self.first_heating_time_model = model
         return True
 

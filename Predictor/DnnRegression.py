@@ -7,7 +7,6 @@ from keras.regularizers import l1
 
 import numpy as np
 
-
 class DnnRegression:
     def __init__(self):
         self.model = Sequential()

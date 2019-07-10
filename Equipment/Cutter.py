@@ -12,7 +12,9 @@ class Cutter:
 
     def calc_cut_time(self):
         print(self.name, ' :: calculate cut time')
-        return random.randint(30, 50)
+        cut_time = int(self.alloc.predictor.cutting_time_prediction(self.current_job) / 60)
+        #print('cut time :', cut_time)
+        return cut_time
 
     def run(self):
         while True:
