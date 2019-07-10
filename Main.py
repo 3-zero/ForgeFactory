@@ -3,8 +3,6 @@ from copy import deepcopy
 from datetime import datetime
 import json
 import sys
-from Predictor.Predictor import *
-import warnings
 
 def dict_to_time(obj):
     return int((datetime(obj['year'], obj['month'], obj['day'], obj['hour'], obj['minute'],
@@ -70,9 +68,6 @@ def read_data(file):
         None
     return data
 
-#warnings.filterwarnings(action='ignore')
-from absl import logging
-logging._warn_preinit_stderr = 0
 
 simul_start_time = datetime(2013, 2, 26, 10)
 
@@ -86,12 +81,10 @@ product_data = read_data('product')
 ingot_data = read_data('ingot')
 job_data = read_data('job')
 
-#print(product_data), print(ingot_data), print(job_data)
+print(product_data), print(ingot_data), print(job_data)
 
 #print(dict_to_time(job_data[0]['properties']['deadline']))
 #print(job_data[0]['properties']['deadline'])
 
-predictor = Predictor()
-
-simulator = Simulator(predictor, deepcopy(product_data), deepcopy(ingot_data), deepcopy(job_data), 4, 2, 2, 2)
+simulator = Simulator(deepcopy(product_data), deepcopy(ingot_data), deepcopy(job_data), 4, 2, 2, 2)
 simulator.run()

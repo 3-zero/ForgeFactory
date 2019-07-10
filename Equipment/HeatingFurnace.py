@@ -8,6 +8,7 @@ class HeatingFurnace:
         self.alloc = allocator
         self.num = num
         self.name = 'heating_furnace_' + str(num + 1).zfill(2)
+        self.capacity = 300
 
         self.recharging_wakeup = simpy.Store(self.env)
         self.cycle_complete_wakeup = simpy.Store(self.env)
@@ -62,29 +63,29 @@ class HeatingFurnace:
 
             # 작업 할당 받기
             print(self.env.now, self.name, ' :: insertion')
-            new_job = self.alloc.heating_allocate(self.name)
+            new_job = self.alloc.heating_allocate(self.name, self.capacity)
             while new_job == None:
                 if self.num != 0:
-                    print(self.env.now, self.name, ' :: job list empty')
+                    print(self.env.now, self.name, ' :: job list empty exit!')
                     self.env.exit()
                 yield self.env.timeout(10)
-                new_job = self.alloc.heating_allocate(self.name)
+                new_job = self.alloc.heating_allocate(self.name, self.name)
 
             # print('debug : alloc : ', all)
             self.current_job_list.extend(new_job)
             # if len(self.current_job_list) == 0:
-            print('job list :', self.current_job_list)
+            print(self.name, 'job list :', self.current_job_list)
             print(self.env.now, self.name, ' :: insertion complete')
 
             # 가열 시작
             heating_time = self.calc_heating_time()
             for j in self.current_job_list:
-                j['properties']['current_equip'] = self.name
-                j['properties']['last_process'] = 'heating'
+                # j['properties']['current_equip'] = self.name
+                # j['properties']['last_process'] = 'heating'
                 j['properties']['last_process_end_time'] = self.env.now + heating_time
-                # j['properties']['instruction_log'].append(self.name)
-                j['properties']['last_heating_furnace'] = self.name
-                j['properties']['next_instruction'] += 1
+                # # j['properties']['instruction_log'].append(self.name)
+                # j['properties']['last_heating_furnace'] = self.name
+                # j['properties']['next_instruction'] += 1
             print(self.env.now, self.name, ' :: heating start')
             yield self.env.timeout(heating_time)
             print(self.env.now, self.name, ' :: heating complete')
