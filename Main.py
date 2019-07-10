@@ -4,7 +4,6 @@ from datetime import datetime
 import json
 import sys
 from Predictor.Predictor import *
-import warnings
 
 def dict_to_time(obj):
     return int((datetime(obj['year'], obj['month'], obj['day'], obj['hour'], obj['minute'],
@@ -37,13 +36,16 @@ def read_data(file):
             d['properties']['instruction_list'] = []
             d['properties']['last_heating_furnace'] = None
             d['properties']['next_instruction'] = 0
+            d['properties']['product'] = None
+            d['properties']['ingot'] = None
             product_id_list = d['properties']['product_id_list']
             for product_id in product_id_list:
                 for product in product_data:
                     #print(product['id'], product_id)
                     if product['id'] == product_id:
                         instruction_list = product['properties']['instruction_id_list']
-                        #print(instruction_list)
+                        if d['properties']['product'] == None:
+                            d['properties']['product'] = product['properties']
                         break
                 for i in range(len(instruction_list)):
                     inst = instruction_list[i].split('_')
@@ -71,8 +73,8 @@ def read_data(file):
     return data
 
 #warnings.filterwarnings(action='ignore')
-from absl import logging
-logging._warn_preinit_stderr = 0
+#from absl import logging
+#logging._warn_preinit_stderr = 0
 
 simul_start_time = datetime(2013, 2, 26, 10)
 
@@ -87,9 +89,6 @@ ingot_data = read_data('ingot')
 job_data = read_data('job')
 
 #print(product_data), print(ingot_data), print(job_data)
-
-#print(dict_to_time(job_data[0]['properties']['deadline']))
-#print(job_data[0]['properties']['deadline'])
 
 predictor = Predictor()
 

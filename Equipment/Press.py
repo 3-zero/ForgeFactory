@@ -11,8 +11,9 @@ class Press:
         print(self.name + ' :: created')
 
     def calc_press_time(self):
-        print(self.name, ' :: calculate press time')
-        return random.randint(30, 50)
+        press_time = self.alloc.predictor.forging_time_prediction(self.current_job)
+        print('press time :', press_time)
+        return press_time
 
     def run(self):
         while True:
@@ -27,8 +28,8 @@ class Press:
             self.current_job['properties']['last_process'] = 'press'
             self.current_job['properties']['last_process_end_time'] = self.env.now + press_time
             self.current_job['properties']['next_instruction'] += 1
-            if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
-                self.current_job['properties']['state'] = 'done'
+            #if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
+            #    self.current_job['properties']['state'] = 'done'
             yield self.env.timeout(press_time)
             print(self.env.now, self.name, ':: press end', self.current_job)
 

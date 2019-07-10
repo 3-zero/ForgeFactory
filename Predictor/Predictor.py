@@ -47,7 +47,7 @@ class Predictor:
 
         self.door_count = 0
 
-    def heating_time_prediction(self, equipment, total_weight=None, max_weight=None):
+    def heating_time_prediction(self, job_list):
         """
         if heating process first operate or middle operate
         :param equipment: heating equipment entity
@@ -55,13 +55,28 @@ class Predictor:
         :param max_weight:
         :return: completion_time (seconds)
         """
+        #형록
+        #구현했는데 인자 안맞다고함...
+        #reheating, heating 차이가 무엇??
+        """if len(job_list) == 0:
+            print('calc heating time. but job list is empty')
+            exit(1)
 
+        total_weight = 0
+        max_weight = 0
+        for job in job_list:
+            w = job['properties']['ingot']['current_weight']
+            total_weight += w
+            if max_weight < w:
+                max_weight = w
         if total_weight == 0 and max_weight == 0:
             return 0
-        state = equipment.state()
-        # door_manipulate_time(equipment)
-        data = []
-        if state:
+        data = [total_weight, max_weight, len(job_list)]
+        heating_time = self.first_heating_time_model.predict(data)
+        print('heating time :', heating_time)
+        return heating_time"""
+
+        """if state:
             # if already process is running
             # completion_time = 60  # 재가열 30분
             # completion_time += random.gauss(0, 1)
@@ -86,7 +101,7 @@ class Predictor:
             # exit(0)
             completion_time *= 3600
         # print('heating_time_prediction takes ', time.time() - s)
-        return float(completion_time)
+        return float(completion_time)"""
 
     def door_manipulate_time(self, equipment, opened=False):
         """
@@ -106,7 +121,7 @@ class Predictor:
             # print("it's open ", self.door_count,end='')
         return door_time
 
-    def forging_time_prediction(self, weight, product):
+    def forging_time_prediction(self, job):
         """
         weight, current_round, product_name, total_round
         outer - 15분(+N(0.1))CASE_OUTER_PIECE
@@ -118,7 +133,8 @@ class Predictor:
         """
         forging_time = 1800
         forging_time += random.gauss(0, 1) * 60
-
+        return 60
+    """
         size = ['small', 'medium', 'big']
 
         data = []
@@ -131,7 +147,7 @@ class Predictor:
         else:
             product_size = size[2]
 
-        tmp = press_product_type.TxtToCode(product.properties['product_type'])
+        tmp = press_product_type.TxtToCode(job['properties']['product']['product_type'])
         data.extend(tmp)
         tmp = press_product_type.TxtToCode(product_size)
         data.extend(tmp)
@@ -140,8 +156,8 @@ class Predictor:
         data.append(product.properties['current_round'])
         forging_time = self.forging_time_model.predict(data)
 
-        return float(forging_time)
-
+        #return float(forging_time)
+    """
     def cutting_time_prediction(self, job):
         weight = job['properties']['ingot']['current_weight']
         tmp = cutter_ingot_type.TxtToCode(job['properties']['ingot']['type'])

@@ -28,8 +28,9 @@ class Cutter:
             self.current_job['properties']['last_process'] = 'cut'
             self.current_job['properties']['last_process_end_time'] = self.env.now + cut_time
             self.current_job['properties']['next_instruction'] += 1
-            if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
-                self.current_job['properties']['state'] = 'done'
+
+            #if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
+            #    self.current_job['properties']['state'] = 'done'
             yield self.env.timeout(cut_time)
             print(self.env.now, self.name, ':: cut end', self.current_job)
 
