@@ -13,8 +13,10 @@ class TreatmentFurnace:
         print(self.name + ' :: created')
 
     def calc_treatment_time(self):
+        treat_time = self.alloc.predictor.treatment_time_prediction(self.name, self.current_job_list)
         print(self.name, ' :: calculate treatment time')
-        return random.randint(30, 50)
+        #return random.randint(30, 50)
+        return treat_time
 
     def run(self):
         while True:

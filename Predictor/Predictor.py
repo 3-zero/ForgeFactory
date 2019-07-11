@@ -124,6 +124,8 @@ class Predictor:
         return door_time
 
     def forging_time_prediction(self, job):
+
+        #self.forging_time_model.predict(data)
         """
         weight, current_round, product_name, total_round
         outer - 15분(+N(0.1))CASE_OUTER_PIECE
@@ -172,11 +174,50 @@ class Predictor:
         cutting_time = self.cutting_time_model.predict(data)
         return float(cutting_time)
 
-    def treatment_time_prediction(self, entity_mgr, equipment, job_id_list):
+    def treatment_time_prediction(self, name, job_list):
+
+        total_weight = 0
+        max_weight = 0
+        ingot_count = 0
+        total_count = len(job_list)
+        ingot_types = {}
+        max_ingot_type = None
+        product_count = {}
+        treatment_num = name[-1]
+
+        for job in job_list:
+            weight = job['properties']['ingot']['current_weight']
+            total_weight += weight
+            if max_weight < weight:
+                max_weight = weight
+            product_id = job['properties']['product_id_list'][0]
+            product_count[product_id] = 1
+            ingot_type = job['properties']['product']['ingot_type_list'][0]
+            if ingot_type not in [*ingot_types]:
+                ingot_types[ingot_type] = 0
+                ingot_count += 1
+            ingot_types[ingot_type] += 1
+
+        max_ingot_count = 0
+        for key, value in ingot_types.items():
+            if max_ingot_count < value:
+                max_ingot_count = value
+                max_ingot_type = key
+
+        tmp = heat_treatmnet_ingot_type.TxtToCode(max_ingot_type)
+        tmp2 = furnace_num.TxtToCode(treatment_num)
+        data = [total_weight, max_weight, total_count, ingot_count] + tmp + [len([*product_count])] + tmp2
+        treat_time = int((self.heat_treating_time_model.predict(data) + 7) * 60)
+
+        print('treat time :', treat_time)
+        return treat_time
+        #---
+
         """
         :param equipment: treatment equipment entity
         :param parameter:
         :return: completion_time (seconds)
+        """
         """
         # 15시간으로 테스트
         # treat cooling time 까지 포함
@@ -218,6 +259,7 @@ class Predictor:
         treat_time *= 3600
 
         return float(treat_time)
+        """
 
     def treatment_cooling_time_prediction(self, equipment, parameter=None):
         """

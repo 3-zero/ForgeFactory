@@ -186,7 +186,6 @@ class HeuristicAllocator:
         else:
             self.waiting_job.append(job)
 
-    # 세영수정
     def get_next_treatment_job(self, name, capacity):
         # ----------------------------------------------------------------------------------------------------
         # 열처리로 작업 할당 휴리스틱
@@ -200,7 +199,10 @@ class HeuristicAllocator:
                 continue
             if j['properties']['last_process_end_time'] != None and j['properties']['last_process_end_time'] > self.env.now:
                 continue
+            print('debug :', j['id'], j['properties']['instruction_list'][0], j['properties']['next_instruction'])
             if j['properties']['instruction_list'][0][j['properties']['next_instruction']] == 'treating':
+                # 여기서 가끔 에러가 남.
+                # IndexError: list index out of range
                 candidate_job_list.append(j)
 
         if len(candidate_job_list) == 0:
