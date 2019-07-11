@@ -47,6 +47,7 @@ class Simulator:
             self.env.process(c.run())
         for tf in self.treatment_furnace_list:
             self.env.process(tf.run())
+        self.env.process(self.alloc._recharging())
 
         simul_end_time = 60 * 24 * 5 #n일 후
         self.env.run(until=simul_end_time)

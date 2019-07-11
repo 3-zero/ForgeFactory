@@ -92,5 +92,5 @@ job_data = read_data('job')
 
 predictor = Predictor()
 
-simulator = Simulator(predictor, deepcopy(product_data), deepcopy(ingot_data), deepcopy(job_data), 4, 2, 2, 2)
+simulator = Simulator(predictor, deepcopy(product_data), deepcopy(ingot_data), deepcopy(job_data), 10, 2, 2, 5)
 simulator.run()

@@ -10,7 +10,7 @@ class HeatingFurnace:
         self.name = 'heating_furnace_' + str(num + 1).zfill(2)
         self.capacity = 300
 
-        self.recharging_wakeup = simpy.Store(self.env)
+        #self.recharging_wakeup = simpy.Store(self.env)
         self.cycle_complete_wakeup = simpy.Store(self.env)
 
         self.current_job_list = []
@@ -34,9 +34,12 @@ class HeatingFurnace:
 
     def recharging(self):
         while True:
-            name, job = yield self.recharging_wakeup.get()
-            if self.name == name:
+            job = yield self.alloc.recharging_wakeup[self.num].get()
+            if self.state == 'keeping':
                 self.current_job_list.append(job)
+                #형록
+                #시간 다시계산코드 추가해야됨
+                self.alloc.recharging_queue.remove(job)
                 print(self.name, ' :: recharging ', job)
 
     def discharging(self):

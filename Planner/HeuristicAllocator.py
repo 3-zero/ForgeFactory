@@ -1,4 +1,5 @@
 from Equipment.HeatingFurnace import *
+from queue import Queue
 
 class HeuristicAllocator:
     def __init__(self, env, predictor, heating_furnace_num):
@@ -9,11 +10,15 @@ class HeuristicAllocator:
         self.request = self.env.event()
 
         self.discharging_wakeup = []
+        self.recharging_wakeup = []
         for i in range(heating_furnace_num):
             self.discharging_wakeup.append(simpy.Store(self.env))
+            self.recharging_wakeup.append(simpy.Store(self.env))
         self.waiting_job = []
         self.complete_job = []
+        self.recharging_queue = []
 
+        self.hf_count = 0
         self.job = None
 
     def next_job_list(self, process):
@@ -104,47 +109,42 @@ class HeuristicAllocator:
             if len(candidate_job_list) == 0:
                 break
         return allocate_job_list
-    """def heating_allocate(self, name):
-        #아무거나 두개 할당해주게 함
 
-        heating_job_list = []
-        for j in self.job:
-            if j['properties']['state'] == 'done':
-                continue
-            if j['properties']['instruction_list'][0][j['properties']['next_instruction']] == 'heating':
-                heating_job_list.append(j)
-        if len(heating_job_list) == 0:
-            return None
-
-        #heating_job_list[0]['properties']['next_instruction'] += 1
-        return [heating_job_list[0]]"""
-
-    def reheating(self, name, job):
+    def recharging(self, job):
         # ----------------------------------------------------------------------------------------------------
         # 가열로 재장입 작업 할당 휴리스틱
         # 1. 현재 문이 열려있거나 온도 유지 중인 가열로를 찾음
         # 2. 평균 중량이 해당 작업의 중량과 가장 유사한 가열로를 선택
         # 3. 문이 열려있거나 온도 유지 중인 가열로가 없는 경우 생길 때까지 대기
         # ----------------------------------------------------------------------------------------------------
-        HeatingFurnace.reheating_wakeup.put(name, job)
+        self.recharging_queue.append(job)
+        """
+        모든 가열로에 job 건네주며 요청.
 
-    #def reheating(self, name, job):
-    #    HeatingFurnace.reheating_wakeup.put(name, job)
+        가열로가 열려있거나 온도유지중이라면
+            job을 받고 추가 후 reheating 시간 다시 예측.
+            allocator의 reheating queue에서 지워줌.
+
+        아니라면
+            반복
+        """
+
+    def _recharging(self):
+        if len(self.recharging_queue) != 0:
+            HeatingFurnace.recharging_wakeup[self.hf_count].put(self.recharging_queue[0])
+        yield self.env.timeout(1)
+        self.hf_count += 1
 
     # 세영수정
     def get_next_press_job(self):
         candidate_job_list = self.next_job_list('forging')
-        #print('hj :', holding_job)
         if len(candidate_job_list) == 0:
             return None
         candidate_job_list = sorted(candidate_job_list, key=lambda j: j['properties']['deadline'])
         target_job = candidate_job_list[0]
         if target_job['properties']['last_process'] == 'holding':
             for i in range(self.heating_furnace_num):
-                #print('target job :', target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1])
-                #self.discharging_wakeup[i].put([target_job['properties']['current_equip'], target_job])
                 self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-                #self.discharging_wakeup[i].put([target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1], target_job])
         print(self.env.now, 'press target job :', target_job)
         return target_job
 
@@ -157,9 +157,7 @@ class HeuristicAllocator:
         target_job = candidate_job_list[0]
         if target_job['properties']['last_process'] == 'holding':
             for i in range(self.heating_furnace_num):
-                #self.discharging_wakeup[i].put([target_job['properties']['current_equip'], target_job])
                 self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-                #self.discharging_wakeup[i].put([target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1], target_job])
         print(self.env.now, 'cutter target job :', target_job)
         return target_job
 
@@ -199,65 +197,9 @@ class HeuristicAllocator:
                 filled += j['properties']['ingot']['current_weight']
                 target_job_list.append(j)
 
-        # if filled < capacity*0.85:
-        #     return None
-
         for j in target_job_list:
             j['properties']['current_equip'] = name
             j['properties']['last_process'] = 'treatment'
             j['properties']['next_instruction'] += 1
 
         return target_job_list
-
-"""
-    def get_next_press_job(self):
-        holding_job = self.next_job_list('forging')
-        #print('hj :', holding_job)
-        if len(holding_job) == 0:
-            return None
-        target_job = holding_job[0]
-        #print('press target job :', target_job)
-        for i in range(self.heating_furnace_num):
-            #print('target job :', target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1])
-            #self.discharging_wakeup[i].put([target_job['properties']['current_equip'], target_job])
-            self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-            #self.discharging_wakeup[i].put([target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1], target_job])
-        return target_job
-
-    def get_next_cut_job(self):
-        holding_job = self.next_job_list('cutting')
-        if len(holding_job) == 0:
-            return None
-        target_job = holding_job[0]
-        for i in range(self.heating_furnace_num):
-            #self.discharging_wakeup[i].put([target_job['properties']['current_equip'], target_job])
-            self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-            #self.discharging_wakeup[i].put([target_job['properties']['instruction_log'][target_job['properties']['next_instruction'] - 1], target_job])
-        return target_job
-
-    def end_job(self, job):
-        self.waiting_job.append(job)
-
-    def get_next_treatment_job(self):
-        target_job_list = []
-        for j in self.job:
-            if j['properties']['state'] == 'done':
-                continue
-            if j['properties']['last_process_end_time'] != None and j['properties']['last_process_end_time'] > self.env.now:
-                continue
-            #print('debug', j)
-            #print('debug', j['properties']['instruction_list'][0])
-            #print('debug', j['properties']['next_instruction'])
-
-            #if len(j['properties']['instruction_list'][0]) == j['properties']['next_instruction']:
-
-            if j['properties']['instruction_list'][0][j['properties']['next_instruction']] == 'treating':
-                target_job_list.append(j)
-
-        if len(target_job_list) == 0:
-            return None
-
-        for i in range(self.heating_furnace_num):
-            self.discharging_wakeup[i].put([target_job_list[0]['properties']['current_equip'], target_job_list[0]])
-        return target_job_list[0]
-"""
