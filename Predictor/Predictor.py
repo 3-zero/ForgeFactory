@@ -47,7 +47,7 @@ class Predictor:
 
         self.door_count = 0
 
-    def heating_time_prediction(self, job_list):
+    def heating_time_prediction(self, name, job_list):
         """
         if heating process first operate or middle operate
         :param equipment: heating equipment entity
@@ -58,7 +58,7 @@ class Predictor:
         #형록
         #구현했는데 인자 안맞다고함...
         #reheating, heating 차이가 무엇??
-        """if len(job_list) == 0:
+        if len(job_list) == 0:
             print('calc heating time. but job list is empty')
             exit(1)
 
@@ -71,10 +71,12 @@ class Predictor:
                 max_weight = w
         if total_weight == 0 and max_weight == 0:
             return 0
-        data = [total_weight, max_weight, len(job_list)]
-        heating_time = self.first_heating_time_model.predict(data)
-        print('heating time :', heating_time)
-        return heating_time"""
+        data = furnace_num.TxtToCode(name[-1])
+        tmp = [total_weight, max_weight]
+        data.extend(tmp)
+        heating_time = int(self.first_heating_time_model.predict(data))
+        #print('heating time :', heating_time)
+        return heating_time
 
         """if state:
             # if already process is running

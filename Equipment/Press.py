@@ -1,4 +1,5 @@
 import random
+from UtilFunction import *
 
 class Press:
     def __init__(self, env, allocator, num):
@@ -21,7 +22,8 @@ class Press:
             if self.current_job == None:
                 yield self.env.timeout(10)
                 continue
-            print(self.env.now, self.name, ':: press start', self.current_job)
+            print(self.env.now, self.name, ':: press start')
+
             press_time = self.calc_press_time()
             #yield self.env.timeout(1)
             self.current_job['properties']['current_equip'] = self.name
@@ -30,8 +32,10 @@ class Press:
             self.current_job['properties']['next_instruction'] += 1
             #if len(self.current_job['properties']['instruction_list'][0]) == self.current_job['properties']['next_instruction']:
             #    self.current_job['properties']['state'] = 'done'
+            nPrint(self.current_job, ['last_process_end_time'])
             yield self.env.timeout(press_time)
-            print(self.env.now, self.name, ':: press end', self.current_job)
+            print(self.env.now, self.name, ':: press end')
+            nPrint(self.current_job)
 
             #self.current_job['properties']['instruction_log'].append(self.name)
             self.alloc.end_job(self.current_job)

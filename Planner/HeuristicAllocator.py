@@ -1,6 +1,6 @@
 from Equipment.HeatingFurnace import *
 from queue import Queue
-
+import time
 class HeuristicAllocator:
     def __init__(self, env, predictor, heating_furnace_num):
         self.env = env
@@ -93,9 +93,11 @@ class HeuristicAllocator:
 
         allocate_job_list = []
         total_weight = 0
-        print('debug: ', name, candidate_job_list)
-        while total_weight < capacity * 0.85:
+        #print('debug: ', name, candidate_job_list)
+        while total_weight < capacity * 0.5:
             selected_job_list, candidate_job_list = self.select_job(candidate_job_list)
+            #print('sjl : ', selected_job_list)
+
             for j in selected_job_list:
                 cur_job_weight = j['properties']['ingot']['current_weight']
                 if total_weight + cur_job_weight < capacity:
@@ -103,11 +105,16 @@ class HeuristicAllocator:
                     j['properties']['last_process'] = 'heating'
                     j['properties']['last_heating_furnace'] = name
                     j['properties']['next_instruction'] += 1
+                    total_weight += cur_job_weight
                     allocate_job_list.append(j)
                 else:
                     candidate_job_list.append(j)
+            # print('cjl : ', candidate_job_list)
+            # print('total_weight :', total_weight)
+            # time.sleep(1)
             if len(candidate_job_list) == 0:
                 break
+
         return allocate_job_list
 
     def recharging(self, job):
@@ -130,10 +137,17 @@ class HeuristicAllocator:
         """
 
     def _recharging(self):
-        if len(self.recharging_queue) != 0:
-            HeatingFurnace.recharging_wakeup[self.hf_count].put(self.recharging_queue[0])
-        yield self.env.timeout(1)
-        self.hf_count += 1
+        # 형록 구현해야됨
+        # put get 서로 handshake하며 가열로 정보 다 받아오고
+        # 그거 기반으로 판단해서 가열로 선택->재장입
+        #
+        while True:
+            if len(self.recharging_queue) != 0:
+                HeatingFurnace.recharging_wakeup[self.hf_count].put(self.recharging_queue[0])
+            yield self.env.timeout(1)
+            self.hf_count += 1
+            if self.hf_count == self.heating_furnace_num:
+                self.hf_count = 0
 
     # 세영수정
     def get_next_press_job(self):
@@ -145,7 +159,9 @@ class HeuristicAllocator:
         if target_job['properties']['last_process'] == 'holding':
             for i in range(self.heating_furnace_num):
                 self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-        print(self.env.now, 'press target job :', target_job)
+        #print(self.env.now, 'press target job :', target_job)
+        print(self.env.now, 'press target job :')
+        nPrint(target_job)
         return target_job
 
     # 세영수정
@@ -158,7 +174,8 @@ class HeuristicAllocator:
         if target_job['properties']['last_process'] == 'holding':
             for i in range(self.heating_furnace_num):
                 self.discharging_wakeup[i].put([target_job['properties']['last_heating_furnace'], target_job])
-        print(self.env.now, 'cutter target job :', target_job)
+        print(self.env.now, 'cutter target job :')
+        nPrint(target_job)
         return target_job
 
     # 세영수정

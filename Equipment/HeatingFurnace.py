@@ -1,6 +1,6 @@
 import simpy
 import random
-
+from UtilFunction import *
 
 class HeatingFurnace:
     def __init__(self, env, allocator, num):
@@ -8,7 +8,7 @@ class HeatingFurnace:
         self.alloc = allocator
         self.num = num
         self.name = 'heating_furnace_' + str(num + 1).zfill(2)
-        self.capacity = 300
+        self.capacity = 200
 
         #self.recharging_wakeup = simpy.Store(self.env)
         self.cycle_complete_wakeup = simpy.Store(self.env)
@@ -18,7 +18,7 @@ class HeatingFurnace:
         print(self.name + ' :: created')
 
     def calc_heating_time(self):
-        self.alloc.predictor.heating_time_prediction(self.current_job_list)
+        self.alloc.predictor.heating_time_prediction(self.name, self.current_job_list)
         print(self.name, ' :: calculate heating time')
         return random.randint(180, 300)
 
@@ -59,7 +59,8 @@ class HeatingFurnace:
                     self.current_job_list.remove(job)
                 except:
                     None
-                print(self.name, ' :: discharging ', job)
+                print(self.name, ':: discharging ')
+                nPrint(job)
                 if len(self.current_job_list) == 0:
                     self.cycle_complete_wakeup.put(True)
 
@@ -78,7 +79,8 @@ class HeatingFurnace:
             # print('debug : alloc : ', all)
             self.current_job_list.extend(new_job)
             # if len(self.current_job_list) == 0:
-            print('job list :', self.current_job_list)
+            #print('job list :', self.current_job_list)
+            nPrint(self.current_job_list)
             print(self.env.now, self.name, ' :: insertion complete')
 
             # 가열 시작

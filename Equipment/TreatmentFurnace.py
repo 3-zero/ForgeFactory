@@ -1,5 +1,5 @@
 import random
-
+from UtilFunction import *
 
 class TreatmentFurnace:
     def __init__(self, env, allocator, num):
@@ -25,7 +25,8 @@ class TreatmentFurnace:
             #new_job['properties']['last_process'] = 'treatment_waiting'
             self.current_job_list.extend(new_job)
 
-            print(self.env.now, self.name, ':: treatment start', self.current_job_list)
+            print(self.env.now, self.name, ':: treatment start')
+            nPrint(self.current_job_list)
             treatment_time = self.calc_treatment_time()
             for j in self.current_job_list:
                 #j['properties']['current_equip'] = self.name
@@ -39,6 +40,7 @@ class TreatmentFurnace:
                 #if len(j['properties']['instruction_list'][0]) == j['properties']['next_instruction']:
                 #    j['properties']['state'] = 'done'
                     #j['properties']['instruction_log'].append(self.name)
-            print(self.env.now, self.name, ':: treatment end', self.current_job_list)
+            print(self.env.now, self.name, ':: treatment end')
+            nPrint(self.current_job_list)
 
             self.current_job_list = []
