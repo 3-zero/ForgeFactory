@@ -7,7 +7,7 @@ class TreatmentFurnace:
         self.alloc = allocator
 
         self.name = 'treatment_furnace_' + str(num + 1)
-        self.capacity = 300
+        self.capacity = 150
 
         self.current_job_list = []
         print(self.name + ' :: created')
@@ -22,12 +22,16 @@ class TreatmentFurnace:
         while True:
             new_job = self.alloc.get_next_treatment_job(self.name, self.capacity)
             if new_job == None:
-                yield self.env.timeout(10)
+                yield self.env.timeout(30)
                 continue
+            if new_job == []:
+                print('Error : deadlock in treating. 기간 안에 맞출 수 없음')
+                exit(1)
             #new_job['properties']['last_process'] = 'treatment_waiting'
             self.current_job_list.extend(new_job)
 
             print(self.env.now, self.name, ':: treatment start')
+            #print('debug : treatment job list :', self.current_job_list)
             nPrint(self.current_job_list)
             treatment_time = self.calc_treatment_time()
             for j in self.current_job_list:

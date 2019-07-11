@@ -49,7 +49,7 @@ class Simulator:
             self.env.process(tf.run())
         self.env.process(self.alloc._recharging())
 
-        simul_end_time = 60 * 24 * 5 #n일 후
+        simul_end_time = 60 * 24 * 15 #n일 후
         self.env.run(until=simul_end_time)
         print('- end simulator -')
         print(self.job)

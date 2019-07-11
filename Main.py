@@ -76,7 +76,7 @@ def read_data(file):
 #from absl import logging
 #logging._warn_preinit_stderr = 0
 
-simul_start_time = datetime(2013, 2, 26, 10)
+simul_start_time = datetime(2013, 2, 21, 10)
 
 """
 json 입력받을 때 time이 dictionary형식으로 저장되어있는데,

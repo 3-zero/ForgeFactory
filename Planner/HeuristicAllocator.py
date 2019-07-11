@@ -190,7 +190,7 @@ class HeuristicAllocator:
         # ----------------------------------------------------------------------------------------------------
         # 열처리로 작업 할당 휴리스틱
         # 1. 마감기한이 임박한 순으로 작업 선택
-        # 2. 열처리로 Capacity 85% 이상 채워질 때까지 대기
+        # 2. 열처리로 Capacity 85% 이상 채워질 때까지 대기 - 현재는 70%
         # 3. 열처리 공정 소요 시간을 예측했을 때 마감기한을 어기는 작업이 생길 경우 더이상 기다리지 않고 할당
         # ----------------------------------------------------------------------------------------------------
         candidate_job_list = []
@@ -207,18 +207,49 @@ class HeuristicAllocator:
 
         if len(candidate_job_list) == 0:
             return None
+
         candidate_job_list = sorted(candidate_job_list, key=lambda j: j['properties']['deadline'])
+        standard_deadline = candidate_job_list[0]['properties']['deadline']
         target_job_list = []
-        filled = 0
+        total_weight = 0
         for j in candidate_job_list:
             cur_job_weight = j['properties']['ingot']['current_weight']
-            if filled + cur_job_weight < capacity:
-                filled += j['properties']['ingot']['current_weight']
+            if total_weight + cur_job_weight < capacity:
                 target_job_list.append(j)
+                treatment_time = self.predictor.treatment_time_prediction(name, target_job_list)
+                print('current time : ', self.env.now)
+                print('treatment time : ', treatment_time)
+                print('deadline : ', standard_deadline)
+                if self.env.now + treatment_time + 30 < standard_deadline:
+                    total_weight += cur_job_weight
+                else:
+                    target_job_list.remove(j)
+                    for j in target_job_list:
+                        j['properties']['current_equip'] = name
+                        j['properties']['last_process'] = 'treatment'
+                        j['properties']['next_instruction'] += 1
+                    return target_job_list
 
-        for j in target_job_list:
-            j['properties']['current_equip'] = name
-            j['properties']['last_process'] = 'treatment'
-            j['properties']['next_instruction'] += 1
+                total_weight += cur_job_weight
+            else:
+                for j in target_job_list:
+                    j['properties']['current_equip'] = name
+                    j['properties']['last_process'] = 'treatment'
+                    j['properties']['next_instruction'] += 1
+                return target_job_list
+        #print('debug : cjl :', candidate_job_list)
+        if total_weight > capacity * 0.7:
+            for j in target_job_list:
+                j['properties']['current_equip'] = name
+                j['properties']['last_process'] = 'treatment'
+                j['properties']['next_instruction'] += 1
+            return target_job_list
+        return None
 
-        return target_job_list
+        #
+        # for j in target_job_list:
+        #     j['properties']['current_equip'] = name
+        #     j['properties']['last_process'] = 'treatment'
+        #     j['properties']['next_instruction'] += 1
+        #
+        # return target_job_list
